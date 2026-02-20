@@ -167,6 +167,14 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- mimify emacs in insert mode
+vim.keymap.set('i', '<C-a>', '<Home>', { desc = 'Moves to the beginning of the line in insert mode'} )
+vim.keymap.set('i', '<C-b>', '<Left>', { desc = 'Moves one character to the left in insert mode'} )
+vim.keymap.set('i', '<C-e>', '<End>', { desc = 'Moves to the end of the line in insert mode'} )
+vim.keymap.set('i', '<C-f>', '<Right>', { desc = 'Move one character to the right in insert mode'} )
+vim.keymap.set('i', '<C-k>', '<Esc>lDa', { desc = 'Kills/deletes from cursor on in insert mode'} )
+vim.keymap.set('i', '<C-y>', '<Esc>pa', { desc = 'Paste yanked test in insert mode in insert mode'} )
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -498,6 +506,7 @@ require('lazy').setup({
       'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       'astral-sh/ruff-lsp',
+      'astral-sh/ty',
 
       -- Useful status updates for LSP.
       { 'j-hui/fidget.nvim', opts = {} },
@@ -604,6 +613,7 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
+        ty = {},
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
@@ -656,7 +666,10 @@ require('lazy').setup({
       -- You can press `g?` for help in this menu.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
+        -- 'lua_ls', -- Lua Language server
+        -- 'stylua', -- Used to format Lua code
         -- You can add other tools here that you want Mason to install
+        'ty',
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -701,7 +714,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'ruff' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -813,7 +826,7 @@ require('lazy').setup({
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
         styles = {
-          comments = { italic = false }, -- Disable italics in comments
+          comments = { italic = true }, -- Disable italics in comments
         },
       }
 
@@ -878,8 +891,8 @@ require('lazy').setup({
     branch = 'main',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local filetypes = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'python' }
-      require('nvim-treesitter').install(filetypes)
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'python' }
+      require('nvim-treesitter').install(parsers)
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match
